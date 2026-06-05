@@ -48,7 +48,12 @@ export default function TelegramPage() {
           }
 
           if (active) {
-            setSaveState({ status: "saved", message: "已保存或更新 Telegram 用户资料" });
+            setSaveState({ status: "saved", message: "登录成功，正在进入灵境 Oracle" });
+            window.setTimeout(() => {
+              if (active) {
+                window.location.assign("/");
+              }
+            }, 1000);
           }
         })
         .catch((error) => {
