@@ -1,9 +1,11 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { createAdminClient } from "@/lib/supabase/admin";
+import { createAdminClient, getSupabaseAdminUrlForLog } from "@/lib/supabase/admin";
 
 export const runtime = "nodejs";
+
+const TELEGRAM_USERS_TABLE = "telegram_users";
 
 const bodySchema = z.object({
   initData: z.string().min(1)
@@ -38,13 +40,25 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Telegram initData validation failed" }, { status: 401 });
   }
 
-  const supabase = createAdminClient();
+  let requestUrl = "";
+  const supabaseUrl = getSupabaseAdminUrlForLog();
+
+  console.log("SUPABASE_URL=", supabaseUrl);
+  console.log("TABLE=", TELEGRAM_USERS_TABLE);
+
+  const supabase = createAdminClient({
+    onRequest(request) {
+      requestUrl = request.url;
+      console.log("REQUEST=", request);
+    }
+  });
+
   if (!supabase) {
     return NextResponse.json({ error: "Supabase service role is not configured" }, { status: 500 });
   }
 
   const { data, error } = await supabase
-    .from("telegram_users")
+    .from(TELEGRAM_USERS_TABLE)
     .upsert(
       {
         telegram_user_id: parsed.user.id,
@@ -61,10 +75,30 @@ export async function POST(request: Request) {
     .single();
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.log("ERROR=", error);
+    return NextResponse.json(
+      {
+        error: error.message,
+        code: error.code,
+        details: error.details,
+        hint: error.hint,
+        requestUrl,
+        table: TELEGRAM_USERS_TABLE,
+        schema: "public"
+      },
+      { status: 500 }
+    );
   }
 
-  return NextResponse.json({ ok: true, user: data });
+  console.log("ERROR=", null);
+
+  return NextResponse.json({
+    ok: true,
+    user: data,
+    requestUrl,
+    table: TELEGRAM_USERS_TABLE,
+    schema: "public"
+  });
 }
 
 function parseTelegramInitData(initData: string) {

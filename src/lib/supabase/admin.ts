@@ -1,7 +1,16 @@
 import { createClient } from "@supabase/supabase-js";
 
-export function createAdminClient() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+type SupabaseRequestLog = {
+  url: string;
+  method: string;
+};
+
+type CreateAdminClientOptions = {
+  onRequest?: (request: SupabaseRequestLog) => void;
+};
+
+export function createAdminClient(options: CreateAdminClientOptions = {}) {
+  const url = normalizeSupabaseUrl(process.env.NEXT_PUBLIC_SUPABASE_URL);
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
   if (!url || !serviceRoleKey) {
@@ -12,8 +21,40 @@ export function createAdminClient() {
     auth: {
       autoRefreshToken: false,
       persistSession: false
-    }
+    },
+    db: {
+      schema: "public"
+    },
+    global: options.onRequest
+      ? {
+          fetch: async (input, init) => {
+            const requestUrl = getRequestUrl(input);
+            options.onRequest?.({
+              url: requestUrl,
+              method: init?.method || "GET"
+            });
+            return fetch(input, init);
+          }
+        }
+      : undefined
   });
+}
+
+export function getSupabaseAdminUrlForLog() {
+  return normalizeSupabaseUrl(process.env.NEXT_PUBLIC_SUPABASE_URL);
+}
+
+function normalizeSupabaseUrl(url?: string) {
+  if (!url) return null;
+
+  const trimmed = url.trim().replace(/^['"]|['"]$/g, "");
+  return trimmed.replace(/\/rest\/v1\/?$/i, "").replace(/\/+$/, "");
+}
+
+function getRequestUrl(input: string | URL | Request) {
+  if (typeof input === "string") return input;
+  if (input instanceof URL) return input.toString();
+  return input.url;
 }
 
 export function getAdminEmails() {
