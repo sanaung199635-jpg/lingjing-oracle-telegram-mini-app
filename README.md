@@ -19,9 +19,9 @@
 │   │   │   ├── daily/route.ts
 │   │   │   ├── fortune/route.ts
 │   │   │   ├── past-life/route.ts
-│   │   │   ├── report/route.ts
 │   │   │   ├── soul-portrait/route.ts
-│   │   │   └── tarot/route.ts
+│   │   │   ├── tarot/route.ts
+│   │   │   └── telegram/
 │   │   ├── globals.css
 │   │   ├── layout.tsx
 │   │   └── page.tsx
@@ -63,19 +63,19 @@ OPENAI_IMAGE_MODEL=gpt-image-1
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
+TELEGRAM_BOT_TOKEN=
 NEXT_PUBLIC_SITE_URL=http://localhost:3000
 ```
-
-Stripe 字段已预留：`STRIPE_SECRET_KEY`、`NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`、`STRIPE_PRICE_VIP_BASIC`、`STRIPE_PRICE_VIP_PRO`。
 
 ## Supabase
 
 1. 创建 Supabase 项目。
 2. 在 SQL Editor 执行 `supabase/schema.sql`。
-3. 在 Auth Providers 启用 Google、Apple、Email。
-4. 将 Site URL 设置为本地或 Vercel 域名。
-5. 将 Supabase URL 和 anon key 写入 `.env.local`。
-6. 将允许访问后台的邮箱写入 `ADMIN_EMAILS`，多个邮箱用英文逗号分隔。
+3. 在 SQL Editor 执行 `supabase/20260605_telegram_users.sql`。
+4. 在 Auth Providers 启用 Google、Apple、Email，供管理员后台使用。
+5. 将 Site URL 设置为本地或 Vercel 域名。
+6. 将 Supabase URL 和 anon key 写入 `.env.local`。
+7. 将允许访问后台的邮箱写入 `ADMIN_EMAILS`，多个邮箱用英文逗号分隔。
 
 数据库表：
 
@@ -83,7 +83,7 @@ Stripe 字段已预留：`STRIPE_SECRET_KEY`、`NEXT_PUBLIC_STRIPE_PUBLISHABLE_K
 - `readings`
 - `soul_portraits`
 - `compatibility_reports`
-- `subscriptions`
+- `telegram_users`
 
 ## API Routes
 
@@ -93,7 +93,8 @@ Stripe 字段已预留：`STRIPE_SECRET_KEY`、`NEXT_PUBLIC_STRIPE_PUBLISHABLE_K
 - `POST /api/past-life`：前世身份故事
 - `POST /api/compatibility`：双人灵魂契合度
 - `POST /api/daily`：今日运势星级
-- `POST /api/report`：30天命运报告 PDF
+- `POST /api/telegram/init`：Telegram Mini App 用户初始化
+- `GET /api/telegram/me`：读取 Telegram 用户资料
 - `GET /api/admin/overview`：管理员后台数据概览
 
 OpenAI 文本调用集中在 `src/lib/openai.ts`，默认使用 Responses API 的 JSON Schema 输出；图片生成使用 GPT Image，并请求 `1024x1536` 竖版海报。
@@ -120,7 +121,6 @@ http://localhost:3000/admin
 - 占卜记录与今日占卜数
 - 灵魂画像记录
 - 双人契合度报告
-- 订阅计划与有效VIP数量
 
 需要配置：
 

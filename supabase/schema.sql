@@ -13,7 +13,7 @@ create table if not exists public.profiles (
 create table if not exists public.readings (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
-  type text not null check (type in ('fortune', 'tarot', 'past_life', 'daily', 'report')),
+  type text not null check (type in ('fortune', 'tarot', 'past_life', 'daily')),
   result jsonb not null,
   created_at timestamptz not null default now()
 );
@@ -33,17 +33,6 @@ create table if not exists public.compatibility_reports (
   created_at timestamptz not null default now()
 );
 
-create table if not exists public.subscriptions (
-  id uuid primary key default gen_random_uuid(),
-  user_id uuid not null references auth.users(id) on delete cascade,
-  plan text not null default 'free' check (plan in ('free', 'vip_99', 'vip_199')),
-  status text not null default 'active' check (status in ('active', 'trialing', 'past_due', 'canceled', 'inactive')),
-  stripe_customer_id text,
-  stripe_subscription_id text,
-  created_at timestamptz not null default now(),
-  unique(user_id)
-);
-
 create index if not exists readings_user_created_idx on public.readings(user_id, created_at desc);
 create index if not exists soul_portraits_user_created_idx on public.soul_portraits(user_id, created_at desc);
 create index if not exists compatibility_user_created_idx on public.compatibility_reports(user_id, created_at desc);
@@ -52,7 +41,6 @@ alter table public.profiles enable row level security;
 alter table public.readings enable row level security;
 alter table public.soul_portraits enable row level security;
 alter table public.compatibility_reports enable row level security;
-alter table public.subscriptions enable row level security;
 
 create policy "profiles_select_own" on public.profiles for select using (auth.uid() = id);
 create policy "profiles_update_own" on public.profiles for update using (auth.uid() = id);
@@ -66,8 +54,6 @@ create policy "soul_insert_own" on public.soul_portraits for insert with check (
 
 create policy "compatibility_select_own" on public.compatibility_reports for select using (auth.uid() = user_id);
 create policy "compatibility_insert_own" on public.compatibility_reports for insert with check (auth.uid() = user_id);
-
-create policy "subscriptions_select_own" on public.subscriptions for select using (auth.uid() = user_id);
 
 create or replace function public.handle_new_user()
 returns trigger
@@ -84,10 +70,6 @@ begin
   )
   on conflict (id) do nothing;
 
-  insert into public.subscriptions (user_id, plan, status)
-  values (new.id, 'free', 'active')
-  on conflict (user_id) do nothing;
-
   return new;
 end;
 $$;
@@ -96,17 +78,6 @@ drop trigger if exists on_auth_user_created on auth.users;
 create trigger on_auth_user_created
 after insert on auth.users
 for each row execute function public.handle_new_user();
-
-create or replace function public.free_daily_reading_count(target_user uuid)
-returns integer
-language sql
-stable
-as $$
-  select count(*)::integer
-  from public.readings
-  where user_id = target_user
-    and created_at >= date_trunc('day', now())
-$$;
 
 -- Optional storage bucket for generated soul posters.
 insert into storage.buckets (id, name, public)

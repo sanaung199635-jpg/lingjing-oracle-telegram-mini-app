@@ -23,7 +23,7 @@ const schema = {
 export async function POST(request: Request) {
   const gate = await assertReadingAllowed();
   if (!gate.allowed) {
-    return NextResponse.json({ error: "免费用户每日最多3次占卜，请升级VIP。" }, { status: 429 });
+    return NextResponse.json({ error: "当前请求暂时不可用，请稍后再试。" }, { status: 429 });
   }
 
   const body = await request.json();

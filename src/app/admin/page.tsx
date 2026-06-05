@@ -5,8 +5,6 @@ import Link from "next/link";
 import {
   Activity,
   ArrowLeft,
-  Crown,
-  Database,
   Gem,
   HeartHandshake,
   Loader2,
@@ -30,8 +28,6 @@ type DashboardResponse = {
     readings: number;
     soulPortraits: number;
     compatibilityReports: number;
-    subscriptions: number;
-    activeVip: number;
     todayReadings: number;
   };
   recent?: Record<string, AdminRow[]>;
@@ -44,8 +40,6 @@ const metricConfig = [
   { key: "readings", label: "占卜记录", icon: Sparkles },
   { key: "soulPortraits", label: "灵魂画像", icon: Gem },
   { key: "compatibilityReports", label: "契合报告", icon: HeartHandshake },
-  { key: "subscriptions", label: "订阅记录", icon: Database },
-  { key: "activeVip", label: "有效VIP", icon: Crown },
   { key: "todayReadings", label: "今日占卜", icon: Activity }
 ];
 
@@ -53,8 +47,7 @@ const tableConfig = [
   { key: "users", label: "最近用户", columns: ["name", "id", "created_at"] },
   { key: "readings", label: "最近占卜", columns: ["type", "user_id", "created_at", "result"] },
   { key: "soulPortraits", label: "灵魂画像", columns: ["user_id", "image_url", "created_at", "analysis"] },
-  { key: "compatibilityReports", label: "契合度报告", columns: ["user_id", "created_at", "report"] },
-  { key: "subscriptions", label: "订阅", columns: ["plan", "status", "user_id", "created_at"] }
+  { key: "compatibilityReports", label: "契合度报告", columns: ["user_id", "created_at", "report"] }
 ];
 
 export default function AdminPage() {
@@ -101,7 +94,7 @@ export default function AdminPage() {
               </span>
               <div>
                 <h1 className="text-3xl font-semibold tracking-normal md:text-5xl">灵境后台</h1>
-                <p className="mt-2 text-sm text-white/55">数据概览、用户记录、占卜内容与订阅状态</p>
+                <p className="mt-2 text-sm text-white/55">数据概览、用户记录、占卜内容与灵魂画像</p>
               </div>
             </div>
           </div>
@@ -131,7 +124,7 @@ export default function AdminPage() {
           </div>
         ) : (
           <div className="space-y-6">
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
               {metricConfig.map((metric) => {
                 const Icon = metric.icon;
                 const value = data?.totals?.[metric.key as keyof NonNullable<DashboardResponse["totals"]>] || 0;

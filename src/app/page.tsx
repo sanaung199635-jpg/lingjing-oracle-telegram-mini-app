@@ -1,21 +1,20 @@
 "use client";
 
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import {
   ArrowDown,
-  BadgeCheck,
   BrainCircuit,
   CalendarDays,
-  Crown,
-  Download,
   Gem,
   HeartHandshake,
+  History,
   Loader2,
   Maximize2,
   MoonStar,
   Sparkles,
   Stars,
+  UserCircle,
   WandSparkles,
   X
 } from "lucide-react";
@@ -23,12 +22,22 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { AuthPanel } from "@/components/auth-panel";
 import { entertainmentNotice } from "@/lib/utils";
 
 type ApiState = Record<string, unknown> | null;
 type TarotVisual = { number: string; symbol: string; subtitle: string; art: TarotArtKind; image?: string };
 type TarotPreview = { card: string; index: number; visual: TarotVisual };
+type TelegramProfile = {
+  id: string;
+  telegram_user_id: number;
+  username: string | null;
+  first_name: string | null;
+  last_name: string | null;
+  photo_url: string | null;
+  language_code: string | null;
+  created_at: string;
+  updated_at: string;
+};
 
 const featureNav = [
   { id: "fortune", label: "命运解析", icon: BrainCircuit },
@@ -36,14 +45,7 @@ const featureNav = [
   { id: "soul", label: "灵魂画像", icon: Gem },
   { id: "past", label: "前世身份", icon: MoonStar },
   { id: "compatibility", label: "双人契合", icon: HeartHandshake },
-  { id: "daily", label: "今日运势", icon: CalendarDays },
-  { id: "report", label: "30天报告", icon: Download }
-];
-
-const planItems = [
-  { name: "免费", price: "0 THB", detail: "每日3次占卜" },
-  { name: "VIP", price: "99 THB/月", detail: "无限占卜 · 高清灵魂画像" },
-  { name: "VIP Pro", price: "199 THB/月", detail: "PDF报告 · 高级仪式模板" }
+  { id: "daily", label: "今日运势", icon: CalendarDays }
 ];
 
 async function postJson<T>(url: string, body: unknown): Promise<T> {
@@ -431,6 +433,67 @@ function StarsRating({ value }: { value: unknown }) {
   );
 }
 
+function formatProfileDate(value?: string | null) {
+  if (!value) return "-";
+  return new Date(value).toLocaleString("zh-CN");
+}
+
+function TelegramProfilePanel({ profile }: { profile: TelegramProfile | null }) {
+  return (
+    <Card id="profile">
+      <CardHeader>
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <CardTitle>我的</CardTitle>
+            <CardDescription>Telegram Mini App 用户资料来自 public.telegram_users。</CardDescription>
+          </div>
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md border border-primary/30 bg-primary/10">
+            <UserCircle className="h-6 w-6 text-primary" />
+          </span>
+        </div>
+      </CardHeader>
+      <CardContent>
+        {profile ? (
+          <div className="grid gap-4 lg:grid-cols-[1fr_0.82fr]">
+            <div className="grid gap-3 sm:grid-cols-2">
+              <ProfileField label="Telegram 用户名" value={`@${profile.username || profile.first_name || "未设置"}`} />
+              <ProfileField label="用户 ID" value={String(profile.telegram_user_id)} />
+              <ProfileField label="首次进入时间" value={formatProfileDate(profile.created_at)} />
+              <ProfileField label="最近使用时间" value={formatProfileDate(profile.updated_at)} />
+            </div>
+            <div className="rounded-lg border border-white/10 bg-black/24 p-4">
+              <div className="mb-3 flex items-center gap-2 text-primary">
+                <History className="h-4 w-4" />
+                <span className="text-sm">占卜历史</span>
+              </div>
+              <p className="text-sm leading-6 text-white/58">历史记录入口已预留，后续可接入 readings 与 telegram_users 的关联记录。</p>
+              <Button className="mt-4" variant="secondary" disabled>
+                即将开放
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <div className="rounded-lg border border-white/10 bg-black/24 p-4">
+            <p className="text-sm leading-6 text-white/62">从 Telegram Mini App 打开后，这里会显示当前用户的 username 与 telegram_user_id。</p>
+            <Button asChild className="mt-4" variant="secondary">
+              <a href="/telegram">重新初始化 Telegram 登录</a>
+            </Button>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+function ProfileField({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-md border border-white/10 bg-black/30 p-3">
+      <div className="mb-1 text-xs uppercase text-primary/70">{label}</div>
+      <div className="break-words text-sm leading-6 text-white/82">{value}</div>
+    </div>
+  );
+}
+
 export default function Home() {
   const [loading, setLoading] = useState<string | null>(null);
   const [fortune, setFortune] = useState<ApiState>(null);
@@ -442,13 +505,27 @@ export default function Home() {
   const [compatibility, setCompatibility] = useState<ApiState>(null);
   const [daily, setDaily] = useState<ApiState>(null);
   const [photoPreview, setPhotoPreview] = useState<string>("");
-
-  const canReport = useMemo(() => fortune || tarot || soul, [fortune, tarot, soul]);
+  const [telegramProfile, setTelegramProfile] = useState<TelegramProfile | null>(null);
 
   useEffect(() => {
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker.register("/sw.js").catch(() => undefined);
     }
+
+    const telegramUserId = window.localStorage.getItem("telegram_user_id");
+    if (!telegramUserId) return;
+
+    fetch(`/api/telegram/me?telegram_user_id=${encodeURIComponent(telegramUserId)}`, { cache: "no-store" })
+      .then(async (response) => {
+        const payload = await response.json();
+        if (!response.ok) {
+          throw new Error(payload?.error || "无法读取 Telegram 用户");
+        }
+        setTelegramProfile(payload.user as TelegramProfile);
+      })
+      .catch(() => {
+        setTelegramProfile(null);
+      });
   }, []);
 
   async function run(key: string, action: () => Promise<ApiState>, setter: (value: ApiState) => void) {
@@ -466,26 +543,6 @@ export default function Home() {
     const reader = new FileReader();
     reader.onload = () => setPhotoPreview(String(reader.result || ""));
     reader.readAsDataURL(file);
-  }
-
-  async function downloadReport() {
-    setLoading("report");
-    try {
-      const response = await fetch("/api/report", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ fortune, tarot, soul })
-      });
-      const blob = await response.blob();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "lingjing-oracle-report.pdf";
-      a.click();
-      URL.revokeObjectURL(url);
-    } finally {
-      setLoading(null);
-    }
   }
 
   return (
@@ -511,10 +568,20 @@ export default function Home() {
             <a href="/admin" className="rounded-md px-3 py-2 text-sm text-primary/75 transition hover:bg-primary/10 hover:text-primary">
               后台
             </a>
+            <a href="#profile" className="rounded-md px-3 py-2 text-sm text-white/60 transition hover:bg-white/8 hover:text-white">
+              我的
+            </a>
           </nav>
-          <Button asChild size="sm">
-            <a href="#fortune">开始</a>
-          </Button>
+          <div className="flex items-center gap-3">
+            {telegramProfile && (
+              <a href="#profile" className="hidden rounded-md border border-primary/20 bg-primary/10 px-3 py-2 text-xs text-primary/90 sm:block">
+                @{telegramProfile.username || telegramProfile.first_name || "Telegram"} · {telegramProfile.telegram_user_id}
+              </a>
+            )}
+            <Button asChild size="sm">
+              <a href="#fortune">开始</a>
+            </Button>
+          </div>
         </div>
       </header>
 
@@ -522,7 +589,7 @@ export default function Home() {
         <div className="container grid gap-12 lg:grid-cols-[1.04fr_0.96fr] lg:items-center">
           <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}>
             <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/10 px-4 py-2 text-sm text-primary">
-              <Crown className="h-4 w-4" />
+              <Sparkles className="h-4 w-4" />
               赛博玄学大师 · AI塔罗 · 灵魂画像
             </div>
             <h1 className="font-display text-6xl font-semibold leading-[0.96] tracking-normal text-white md:text-8xl">
@@ -569,7 +636,7 @@ export default function Home() {
       </section>
 
       <section className="relative border-y border-white/8 bg-black/28 py-8">
-        <div className="container grid gap-3 sm:grid-cols-2 lg:grid-cols-7">
+        <div className="container grid gap-3 sm:grid-cols-2 lg:grid-cols-6">
           {featureNav.map((item) => {
             const Icon = item.icon;
             return (
@@ -587,7 +654,7 @@ export default function Home() {
       </section>
 
       <section className="container pt-12">
-        <AuthPanel />
+        <TelegramProfilePanel profile={telegramProfile} />
       </section>
 
       <section className="container grid gap-6 py-20 lg:grid-cols-2">
@@ -775,43 +842,6 @@ export default function Home() {
             </div>
           </CardContent>
         </Card>
-      </section>
-
-      <section id="report" className="border-y border-white/8 bg-black/35 py-16">
-        <div className="container grid gap-8 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
-          <div>
-            <div className="mb-4 inline-flex items-center gap-2 text-sm text-primary">
-              <BadgeCheck className="h-4 w-4" />
-              VIP功能预留
-            </div>
-            <h2 className="text-3xl font-semibold tracking-normal md:text-5xl">30天命运报告</h2>
-            <p className="mt-4 max-w-2xl text-sm leading-7 text-white/58">
-              PDF包含封面、命运解析、塔罗结果、灵魂画像与未来30天建议。Stripe价格接口已预留：99泰铢/月与199泰铢/月。
-            </p>
-            <div className="mt-7 flex flex-wrap gap-3">
-              <Button disabled={!canReport || loading === "report"} onClick={downloadReport}>
-                {loading === "report" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
-                下载PDF
-              </Button>
-              <Button variant="secondary" asChild>
-                <a href="#fortune">先生成解析</a>
-              </Button>
-            </div>
-          </div>
-          <div className="grid gap-4 sm:grid-cols-3">
-            {planItems.map((item) => (
-              <Card key={item.name} className="bg-white/[0.045]">
-                <CardHeader>
-                  <CardTitle className="text-base">{item.name}</CardTitle>
-                  <CardDescription>{item.price}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm leading-6 text-white/66">{item.detail}</p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
       </section>
 
       <footer className="container py-10 text-sm text-white/45">

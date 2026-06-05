@@ -8,8 +8,7 @@ type CountableTable =
   | "profiles"
   | "readings"
   | "soul_portraits"
-  | "compatibility_reports"
-  | "subscriptions";
+  | "compatibility_reports";
 
 export async function GET() {
   const publicClient = await createServerSupabaseClient();
@@ -60,25 +59,16 @@ export async function GET() {
     readings,
     soulPortraits,
     compatibility,
-    subscriptions,
-    activeVip,
     todayReadings,
     recentUsers,
     recentReadings,
     recentSoul,
-    recentCompatibility,
-    recentSubscriptions
+    recentCompatibility
   ] = await Promise.all([
     count(admin, "profiles"),
     count(admin, "readings"),
     count(admin, "soul_portraits"),
     count(admin, "compatibility_reports"),
-    count(admin, "subscriptions"),
-    admin
-      .from("subscriptions")
-      .select("id", { count: "exact", head: true })
-      .neq("plan", "free")
-      .eq("status", "active"),
     admin
       .from("readings")
       .select("id", { count: "exact", head: true })
@@ -86,8 +76,7 @@ export async function GET() {
     admin.from("profiles").select("id,name,avatar,created_at").order("created_at", { ascending: false }).limit(12),
     admin.from("readings").select("id,user_id,type,result,created_at").order("created_at", { ascending: false }).limit(12),
     admin.from("soul_portraits").select("id,user_id,image_url,analysis,created_at").order("created_at", { ascending: false }).limit(12),
-    admin.from("compatibility_reports").select("id,user_id,report,created_at").order("created_at", { ascending: false }).limit(12),
-    admin.from("subscriptions").select("id,user_id,plan,status,created_at").order("created_at", { ascending: false }).limit(12)
+    admin.from("compatibility_reports").select("id,user_id,report,created_at").order("created_at", { ascending: false }).limit(12)
   ]);
 
   return NextResponse.json({
@@ -101,16 +90,13 @@ export async function GET() {
       readings,
       soulPortraits,
       compatibilityReports: compatibility,
-      subscriptions,
-      activeVip: activeVip.count || 0,
       todayReadings: todayReadings.count || 0
     },
     recent: {
       users: recentUsers.data || [],
       readings: recentReadings.data || [],
       soulPortraits: recentSoul.data || [],
-      compatibilityReports: recentCompatibility.data || [],
-      subscriptions: recentSubscriptions.data || []
+      compatibilityReports: recentCompatibility.data || []
     }
   });
 }

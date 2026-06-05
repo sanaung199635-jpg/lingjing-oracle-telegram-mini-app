@@ -48,6 +48,10 @@ export default function TelegramPage() {
           }
 
           if (active) {
+            const telegramUserId = payload?.user?.telegram_user_id;
+            if (telegramUserId) {
+              window.localStorage.setItem("telegram_user_id", String(telegramUserId));
+            }
             setSaveState({ status: "saved", message: "登录成功，正在进入灵境 Oracle" });
             window.setTimeout(() => {
               if (active) {

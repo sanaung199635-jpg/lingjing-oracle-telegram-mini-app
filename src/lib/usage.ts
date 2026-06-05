@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 
-export type ReadingType = "fortune" | "tarot" | "past_life" | "daily" | "report";
+export type ReadingType = "fortune" | "tarot" | "past_life" | "daily";
 
 export async function assertReadingAllowed() {
   const supabase = await createClient();
@@ -16,19 +16,7 @@ export async function assertReadingAllowed() {
     return { allowed: true, userId: null };
   }
 
-  const { data: subscription } = await supabase
-    .from("subscriptions")
-    .select("plan,status")
-    .eq("user_id", user.id)
-    .maybeSingle();
-
-  const isVip = subscription?.status === "active" && subscription.plan !== "free";
-  if (isVip) {
-    return { allowed: true, userId: user.id };
-  }
-
-  const { data: count } = await supabase.rpc("free_daily_reading_count", { target_user: user.id });
-  return { allowed: Number(count || 0) < 3, userId: user.id };
+  return { allowed: true, userId: user.id };
 }
 
 export async function saveReading(type: ReadingType, result: unknown) {

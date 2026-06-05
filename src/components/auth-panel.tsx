@@ -51,7 +51,7 @@ export function AuthPanel() {
     <Card>
       <CardHeader>
         <CardTitle>用户系统</CardTitle>
-        <CardDescription>支持 Google、Apple 与邮箱登录，会员次数与报告记录由 Supabase 承载。</CardDescription>
+        <CardDescription>支持 Google、Apple 与邮箱登录，管理员后台权限由 Supabase 承载。</CardDescription>
       </CardHeader>
       <CardContent>
         {userEmail ? (

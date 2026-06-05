@@ -9,7 +9,7 @@ export const metadata: Metadata = {
     default: "灵境 Oracle | 赛博玄学大师 · AI塔罗 · 灵魂画像",
     template: "%s | 灵境 Oracle"
   },
-  description: "探索命运深处的答案：AI命运解析、AI塔罗、灵魂画像、前世身份、双人契合度与30天命运报告。",
+  description: "探索命运深处的答案：AI命运解析、AI塔罗、灵魂画像、前世身份、双人契合度与今日运势。",
   applicationName: "灵境 Oracle",
   keywords: ["AI塔罗", "灵魂画像", "命运解析", "赛博玄学", "Oracle"],
   authors: [{ name: "灵境 Oracle" }],
@@ -50,11 +50,7 @@ export default function RootLayout({
     name: "灵境 Oracle",
     description: "赛博玄学大师 · AI塔罗 · 灵魂画像",
     applicationCategory: "EntertainmentApplication",
-    operatingSystem: "Web, iOS, Android",
-    offers: [
-      { "@type": "Offer", price: "99", priceCurrency: "THB", name: "VIP Basic" },
-      { "@type": "Offer", price: "199", priceCurrency: "THB", name: "VIP Pro" }
-    ]
+    operatingSystem: "Web, iOS, Android"
   };
 
   return (
