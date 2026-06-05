@@ -126,7 +126,7 @@ function VisualResult({
 }) {
   if (!result) {
     return (
-      <div className="oracle-poster flex min-h-[220px] items-center justify-center p-6 text-center">
+      <div className="oracle-poster flex min-h-[180px] items-center justify-center p-4 text-center sm:min-h-[220px] sm:p-6">
         <div>
           <Sparkles className="mx-auto mb-4 h-8 w-8 text-primary/80" />
           <p className="text-sm leading-6 text-white/52">生成后会以图片卡片形式呈现，不需要额外准备素材。</p>
@@ -138,8 +138,8 @@ function VisualResult({
   if (type === "tarot") {
     const cards = Array.isArray(result.cards) ? result.cards.map(String) : [];
     return (
-      <div className="space-y-4">
-        <div className="grid gap-3 sm:grid-cols-3">
+      <div className="space-y-3 sm:space-y-4">
+        <div className="grid grid-cols-3 gap-2 sm:gap-3">
           {cards.map((card, index) => {
             const visual = tarotVisuals[card] || { number: "??", symbol: "✦", subtitle: "神秘启示", art: "star" as TarotArtKind };
             const isRevealed = Boolean(revealedTarot[index]);
@@ -184,8 +184,8 @@ function VisualResult({
                       {!visual.image && <TarotFigureArt kind={visual.art} symbol={visual.symbol} />}
                       <span>
                         <span className="text-xs text-primary/70">{["过去", "现在", "未来"][index]}</span>
-                        <strong className="mt-1 block text-2xl font-semibold leading-tight text-white">{card}</strong>
-                        <span className="mt-2 block text-xs tracking-[0.18em] text-white/44">{visual.subtitle}</span>
+                        <strong className="mt-1 block text-base font-semibold leading-tight text-white sm:text-2xl">{card}</strong>
+                        <span className="mt-1 block text-[10px] text-white/44 sm:mt-2 sm:text-xs sm:tracking-[0.18em]">{visual.subtitle}</span>
                         {visual.image && isRevealed && (
                           <span className="mt-3 inline-flex items-center justify-center gap-1 rounded-full border border-primary/25 bg-black/35 px-3 py-1 text-[11px] text-primary/80">
                             <Maximize2 className="h-3 w-3" />
@@ -389,16 +389,16 @@ function PosterSummary({
   const Icon = icon === "heart" ? HeartHandshake : icon === "moon" ? MoonStar : BrainCircuit;
 
   return (
-    <div className="oracle-poster p-5">
+    <div className="oracle-poster p-4 sm:p-5">
       <div className="poster-orbit" />
       <div className="relative z-10">
-        <div className="mb-5 flex items-start justify-between gap-4 border-b border-primary/20 pb-5">
+        <div className="mb-4 flex items-start justify-between gap-4 border-b border-primary/20 pb-4 sm:mb-5 sm:pb-5">
           <div>
             <p className="text-xs uppercase tracking-[0.26em] text-primary/70">{eyebrow}</p>
-            <h3 className="mt-2 text-2xl font-semibold leading-tight text-white">{title}</h3>
+            <h3 className="mt-2 text-xl font-semibold leading-tight text-white sm:text-2xl">{title}</h3>
           </div>
-          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-primary/30 bg-primary/10">
-            <Icon className="h-6 w-6 text-primary" />
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-primary/30 bg-primary/10 sm:h-12 sm:w-12">
+            <Icon className="h-5 w-5 text-primary sm:h-6 sm:w-6" />
           </span>
         </div>
         <div className="grid gap-3">
@@ -440,7 +440,7 @@ function formatProfileDate(value?: string | null) {
 
 function TelegramProfilePanel({ profile }: { profile: TelegramProfile | null }) {
   return (
-    <Card id="profile">
+    <Card id="profile" className="scroll-mt-24">
       <CardHeader>
         <div className="flex items-start justify-between gap-4">
           <div>
@@ -546,20 +546,20 @@ export default function Home() {
   }
 
   return (
-    <main className="relative min-h-screen overflow-hidden text-white">
+    <main className="relative min-h-[100dvh] overflow-x-hidden text-white">
       <div className="star-field" />
       <div className="energy-line" />
       <div className="oracle-grid pointer-events-none absolute inset-0 opacity-55" />
 
-      <header className="fixed left-0 right-0 top-0 z-30 border-b border-white/8 bg-black/45 backdrop-blur-xl">
-        <div className="container flex h-16 items-center justify-between">
+      <header className="fixed left-0 right-0 top-0 z-30 border-b border-white/8 bg-black/55 pt-[env(safe-area-inset-top)] backdrop-blur-xl">
+        <div className="container flex h-14 items-center justify-between md:h-16">
           <a href="#" className="flex items-center gap-3">
             <span className="flex h-9 w-9 items-center justify-center rounded-md border border-primary/35 bg-primary/10">
               <WandSparkles className="h-5 w-5 text-primary" />
             </span>
             <span className="font-semibold">灵境 Oracle</span>
           </a>
-          <nav className="hidden items-center gap-1 lg:flex">
+          <nav className="hidden items-center gap-1 xl:flex">
             {featureNav.map((item) => (
               <a key={item.id} href={`#${item.id}`} className="rounded-md px-3 py-2 text-sm text-white/60 transition hover:bg-white/8 hover:text-white">
                 {item.label}
@@ -574,7 +574,7 @@ export default function Home() {
           </nav>
           <div className="flex items-center gap-3">
             {telegramProfile && (
-              <a href="#profile" className="hidden rounded-md border border-primary/20 bg-primary/10 px-3 py-2 text-xs text-primary/90 sm:block">
+              <a href="#profile" className="hidden max-w-[240px] truncate rounded-md border border-primary/20 bg-primary/10 px-3 py-2 text-xs text-primary/90 md:block">
                 @{telegramProfile.username || telegramProfile.first_name || "Telegram"} · {telegramProfile.telegram_user_id}
               </a>
             )}
@@ -585,19 +585,19 @@ export default function Home() {
         </div>
       </header>
 
-      <section className="relative flex min-h-screen items-center pb-20 pt-24">
-        <div className="container grid gap-12 lg:grid-cols-[1.04fr_0.96fr] lg:items-center">
+      <section className="relative flex min-h-[100dvh] items-center pb-8 pt-[calc(4.25rem+env(safe-area-inset-top))] md:pb-14 md:pt-24">
+        <div className="container grid gap-7 lg:grid-cols-[0.96fr_0.86fr] lg:items-center xl:gap-12">
           <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}>
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/10 px-4 py-2 text-sm text-primary">
+            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/10 px-3 py-2 text-xs text-primary sm:mb-6 sm:px-4 sm:text-sm">
               <Sparkles className="h-4 w-4" />
               赛博玄学大师 · AI塔罗 · 灵魂画像
             </div>
-            <h1 className="font-display text-6xl font-semibold leading-[0.96] tracking-normal text-white md:text-8xl">
+            <h1 className="font-display text-4xl font-semibold leading-[0.98] tracking-normal text-white sm:text-5xl md:text-7xl xl:text-8xl">
               灵境 Oracle
             </h1>
-            <p className="mt-6 max-w-2xl text-xl leading-8 text-white/68 md:text-2xl">探索命运深处的答案</p>
-            <p className="mt-5 max-w-2xl text-sm leading-7 text-white/52">{entertainmentNotice}</p>
-            <div className="mt-9 flex flex-col gap-3 sm:flex-row">
+            <p className="mt-4 max-w-xl text-lg leading-7 text-white/68 md:mt-6 md:text-2xl">探索命运深处的答案</p>
+            <p className="mt-4 max-w-xl text-sm leading-6 text-white/52 md:leading-7">{entertainmentNotice}</p>
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row md:mt-9">
               <Button asChild size="lg">
                 <a href="#fortune">
                   开始占卜
@@ -617,33 +617,33 @@ export default function Home() {
             initial={{ opacity: 0, scale: 0.96 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.12, duration: 0.8 }}
-            className="relative mx-auto aspect-square w-full max-w-[520px]"
+            className="relative mx-auto aspect-square w-full max-w-[300px] sm:max-w-[380px] lg:max-w-[460px] xl:max-w-[500px]"
           >
             <div className="absolute inset-0 rounded-full border border-primary/20 shadow-gold" />
             <div className="absolute inset-[9%] rounded-full border border-accent/22 shadow-violet" />
             <div className="absolute inset-[20%] rounded-full border border-primary/30" />
             <div className="absolute left-1/2 top-1/2 h-[68%] w-[68%] -translate-x-1/2 -translate-y-1/2 rotate-45 border border-primary/28 bg-black/22 backdrop-blur-sm" />
             <div className="absolute inset-0 flex items-center justify-center">
-              <div className="flex h-40 w-40 items-center justify-center rounded-full border border-primary/35 bg-[#090908] shadow-gold">
-                <Sparkles className="h-16 w-16 text-primary" />
+              <div className="flex h-24 w-24 items-center justify-center rounded-full border border-primary/35 bg-[#090908] shadow-gold sm:h-32 sm:w-32 lg:h-40 lg:w-40">
+                <Sparkles className="h-10 w-10 text-primary sm:h-14 sm:w-14 lg:h-16 lg:w-16" />
               </div>
             </div>
-            <div className="absolute bottom-4 left-1/2 w-[82%] -translate-x-1/2 rounded-lg border border-white/10 bg-black/54 p-4 text-center text-sm text-white/70 backdrop-blur-xl">
+            <div className="absolute bottom-3 left-1/2 w-[86%] -translate-x-1/2 rounded-lg border border-white/10 bg-black/54 p-3 text-center text-xs leading-5 text-white/70 backdrop-blur-xl sm:bottom-4 sm:p-4 sm:text-sm">
               AI以象征、叙事与视觉生成回应你的问题
             </div>
           </motion.div>
         </div>
       </section>
 
-      <section className="relative border-y border-white/8 bg-black/28 py-8">
-        <div className="container grid gap-3 sm:grid-cols-2 lg:grid-cols-6">
+      <section className="relative border-y border-white/8 bg-black/28 py-5 md:py-8">
+        <div className="container grid gap-2 sm:grid-cols-2 md:gap-3 lg:grid-cols-6">
           {featureNav.map((item) => {
             const Icon = item.icon;
             return (
               <a
                 key={item.id}
                 href={`#${item.id}`}
-                className="glass-panel flex items-center gap-3 rounded-lg px-4 py-4 text-sm text-white/74 transition hover:border-primary/35 hover:text-white"
+                className="glass-panel flex items-center gap-3 rounded-lg px-3 py-3 text-sm text-white/74 transition hover:border-primary/35 hover:text-white md:px-4 md:py-4"
               >
                 <Icon className="h-5 w-5 text-primary" />
                 {item.label}
@@ -653,12 +653,12 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="container pt-12">
+      <section className="container pt-8 md:pt-12">
         <TelegramProfilePanel profile={telegramProfile} />
       </section>
 
-      <section className="container grid gap-6 py-20 lg:grid-cols-2">
-        <Card id="fortune">
+      <section className="container grid gap-4 py-10 md:gap-6 md:py-16 lg:grid-cols-2">
+        <Card id="fortune" className="scroll-mt-24">
           <CardHeader>
             <CardTitle>AI命运解析</CardTitle>
             <CardDescription>输入姓名与生日，生成命运称号、灵魂属性、守护元素与神秘忠告。</CardDescription>
@@ -685,7 +685,7 @@ export default function Home() {
           </CardContent>
         </Card>
 
-        <Card id="tarot">
+        <Card id="tarot" className="scroll-mt-24">
           <CardHeader>
             <CardTitle>AI塔罗</CardTitle>
             <CardDescription>随机抽取三张牌，生成过去、现在、未来与行动建议。</CardDescription>
@@ -723,7 +723,7 @@ export default function Home() {
           </CardContent>
         </Card>
 
-        <Card id="soul">
+        <Card id="soul" className="scroll-mt-24">
           <CardHeader>
             <CardTitle>灵魂画像</CardTitle>
             <CardDescription>上传照片后生成灵魂属性、灵魂颜色、守护者与神秘灵魂海报。</CardDescription>
@@ -751,7 +751,7 @@ export default function Home() {
           </CardContent>
         </Card>
 
-        <Card id="past">
+        <Card id="past" className="scroll-mt-24">
           <CardHeader>
             <CardTitle>前世身份</CardTitle>
             <CardDescription>随机生成时代、职业、经历、结局与遗留天赋，故事不少于500字。</CardDescription>
@@ -777,7 +777,7 @@ export default function Home() {
           </CardContent>
         </Card>
 
-        <Card id="compatibility">
+        <Card id="compatibility" className="scroll-mt-24">
           <CardHeader>
             <CardTitle>双人灵魂契合度</CardTitle>
             <CardDescription>输入两个人的姓名，生成契合度、灵魂关系、优势、挑战与成长建议。</CardDescription>
@@ -804,7 +804,7 @@ export default function Home() {
           </CardContent>
         </Card>
 
-        <Card id="daily">
+        <Card id="daily" className="scroll-mt-24">
           <CardHeader>
             <CardTitle>今日运势</CardTitle>
             <CardDescription>爱情、事业、财富、学习、社交、健康习惯，以星级形式展示。</CardDescription>
@@ -844,7 +844,7 @@ export default function Home() {
         </Card>
       </section>
 
-      <footer className="container py-10 text-sm text-white/45">
+      <footer className="container pb-[calc(2rem+env(safe-area-inset-bottom))] pt-8 text-sm text-white/45 md:pt-10">
         <div className="flex flex-col gap-3 border-t border-white/8 pt-6 md:flex-row md:items-center md:justify-between">
           <span>© 2026 灵境 Oracle</span>
           <span>{entertainmentNotice} 禁止医疗、死亡、投资、法律等现实预测或建议。</span>

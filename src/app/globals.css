@@ -18,15 +18,21 @@
 
 html {
   scroll-behavior: smooth;
+  min-height: 100%;
+  overflow-x: hidden;
 }
 
 body {
-  min-height: 100vh;
+  min-height: 100dvh;
   overflow-x: hidden;
   background:
     radial-gradient(circle at 18% 12%, rgba(212, 175, 55, 0.15), transparent 30%),
     radial-gradient(circle at 78% 22%, rgba(123, 97, 255, 0.14), transparent 28%),
     linear-gradient(180deg, #020203 0%, #07070a 52%, #020203 100%);
+}
+
+main {
+  min-height: 100dvh;
 }
 
 ::selection {
@@ -80,6 +86,7 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.1);
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.035));
   backdrop-filter: blur(18px);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.18);
 }
 
 .oracle-poster {
@@ -364,17 +371,87 @@ body {
 }
 
 @media (max-width: 640px) {
+  body {
+    background:
+      radial-gradient(circle at 16% 8%, rgba(212, 175, 55, 0.12), transparent 28%),
+      radial-gradient(circle at 86% 18%, rgba(123, 97, 255, 0.12), transparent 30%),
+      linear-gradient(180deg, #020203 0%, #07070a 58%, #020203 100%);
+  }
+
+  .star-field {
+    opacity: 0.24;
+    background-size:
+      140px 140px,
+      190px 190px,
+      230px 230px;
+  }
+
+  .energy-line {
+    inset: 10% -50% auto -40%;
+    height: 180px;
+    opacity: 0.72;
+  }
+
+  .oracle-grid {
+    background-size: 48px 48px;
+  }
+
+  .oracle-poster {
+    box-shadow: 0 14px 42px rgba(0, 0, 0, 0.28), inset 0 0 0 1px rgba(255, 255, 255, 0.035);
+  }
+
+  .poster-orbit {
+    right: -92px;
+    top: -96px;
+    height: 180px;
+    width: 180px;
+  }
+
   .tarot-card,
   .tarot-flip,
   .tarot-flip-inner {
-    min-height: 250px;
+    min-height: clamp(220px, 67vw, 260px);
+  }
+
+  .tarot-card {
+    padding: 14px;
+  }
+
+  .tarot-back-star {
+    height: 76px;
+    width: 76px;
+    font-size: 36px;
+  }
+
+  .tarot-back-title {
+    top: 16px;
+    font-size: 8px;
+    letter-spacing: 0.16em;
+  }
+
+  .tarot-back-hint {
+    bottom: 16px;
+    font-size: 11px;
+  }
+
+  .tarot-card::before {
+    inset: 7px;
+  }
+
+  .tarot-card::after {
+    inset: 12px;
   }
 
   .tarot-art {
-    height: 160px;
+    height: 140px;
+  }
+
+  .tarot-zoom-card {
+    max-height: calc(100dvh - 32px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    border-radius: 12px;
   }
 
   .tarot-zoom-overlay {
-    padding: 28px 26px 36px;
+    padding: calc(24px + env(safe-area-inset-top)) 22px calc(30px + env(safe-area-inset-bottom));
   }
 }

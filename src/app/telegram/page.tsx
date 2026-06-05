@@ -76,8 +76,8 @@ export default function TelegramPage() {
   }, []);
 
   return (
-    <main className="min-h-screen bg-[#050507] text-white">
-      <section className="mx-auto flex min-h-screen w-full max-w-md flex-col px-4 pb-[calc(24px+env(safe-area-inset-bottom))] pt-6">
+    <main className="min-h-[100dvh] overflow-x-hidden bg-[#050507] text-white">
+      <section className="mx-auto flex min-h-[100dvh] w-full max-w-md flex-col px-4 pb-[calc(24px+env(safe-area-inset-bottom))] pt-[calc(24px+env(safe-area-inset-top))]">
         <div className="mb-6 flex items-center gap-3">
           <span className="flex h-11 w-11 items-center justify-center rounded-md border border-primary/35 bg-primary/10">
             <Send className="h-5 w-5 text-primary" />
